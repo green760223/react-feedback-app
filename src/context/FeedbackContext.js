@@ -17,7 +17,9 @@ export const FeedbackProvider = ({ children }) => {
   // Fetch feedback
   const fetchFeedback = async () => {
     try {
-      const response = await fetch(`/feedback?_sort=id&_order=desc`)
+      const response = await fetch(
+        `https://feedback-json-data-server.onrender.com/feedback?_sort=id&_order=desc`
+      )
 
       if (!response.ok) {
         throw new Error("Network response was not ok " + response.statusText)
@@ -33,17 +35,25 @@ export const FeedbackProvider = ({ children }) => {
 
   // Update feedback item
   const updateFeedback = async (id, updItem) => {
-    const response = await fetch(`/feedback/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updItem),
-    })
+    const response = await fetch(
+      `https://feedback-json-data-server.onrender.com/feedback/${id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updItem),
+      }
+    )
 
     const data = await response.json()
 
     setFeedback(
-      feedback.map((item) => (item.id === id ? { ...item, ...data } : item))
+      setFeedback(feedback.map((item) => (item.id === id ? data : item)))
     )
+
+    setFeedbackEdit({
+      item: {},
+      edit: false,
+    })
   }
 
   // Set item to be updated
@@ -57,7 +67,10 @@ export const FeedbackProvider = ({ children }) => {
   // Delete feedback
   const deleteFeedback = async (id) => {
     if (window.confirm("Are you sure you want to delete?")) {
-      await fetch(`/feedback/${id}`, { method: "DELETE" })
+      await fetch(
+        `https://feedback-json-data-server.onrender.com/feedback/${id}`,
+        { method: "DELETE" }
+      )
 
       setFeedback(feedback.filter((item) => item.id !== id))
     }
@@ -65,13 +78,16 @@ export const FeedbackProvider = ({ children }) => {
 
   // Add feedback
   const addFeedback = async (newFeedback) => {
-    const response = await fetch("/feedback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newFeedback),
-    })
+    const response = await fetch(
+      "https://feedback-json-data-server.onrender.com/feedback",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newFeedback),
+      }
+    )
 
     const data = await response.json()
 
