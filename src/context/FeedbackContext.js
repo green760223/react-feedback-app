@@ -16,10 +16,19 @@ export const FeedbackProvider = ({ children }) => {
 
   // Fetch feedback
   const fetchFeedback = async () => {
-    const response = await fetch(`/feedback?_sort=id&_order=desc`)
-    const data = await response.json()
-    setFeedback(data)
-    setIsLoading(false)
+    try {
+      const response = await fetch(`/feedback?_sort=id&_order=desc`)
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok " + response.statusText)
+      }
+      const data = await response.json()
+      setFeedback(data)
+    } catch (error) {
+      console.error("Fetch error: ", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   // Update feedback item
