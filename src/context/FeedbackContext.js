@@ -16,44 +16,55 @@ export const FeedbackProvider = ({ children }) => {
 
   // Fetch feedback
   const fetchFeedback = async () => {
-    try {
-      const response = await fetch(
-        `https://feedback-json-data-server.onrender.com/feedback?_sort=id&_order=desc`
-      )
+    const response = await fetch(`/feedback?_sort=id&_order=desc`)
+    const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok " + response.statusText)
-      }
-      const data = await response.json()
-      setFeedback(data)
-    } catch (error) {
-      console.error("Fetch error: ", error)
-    } finally {
-      setIsLoading(false)
-    }
+    setFeedback(data)
+    setIsLoading(false)
   }
 
   // Update feedback item
   const updateFeedback = async (id, updItem) => {
-    const response = await fetch(
-      `https://feedback-json-data-server.onrender.com/feedback/${id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updItem),
-      }
-    )
+    const response = await fetch(`/feedback/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updItem),
+    })
 
     const data = await response.json()
 
-    setFeedback(
-      setFeedback(feedback.map((item) => (item.id === id ? data : item)))
-    )
+    setFeedback(feedback.map((item) => (item.id === id ? data : item)))
 
     setFeedbackEdit({
       item: {},
       edit: false,
     })
+  }
+
+  // Delete feedback
+  const deleteFeedback = async (id) => {
+    if (window.confirm("Are you sure you want to delete?")) {
+      await fetch(`/feedback/${id}`, { method: "DELETE" })
+
+      setFeedback(feedback.filter((item) => item.id !== id))
+    }
+  }
+
+  // Add feedback
+  const addFeedback = async (newFeedback) => {
+    const response = await fetch("/feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newFeedback),
+    })
+
+    const data = await response.json()
+
+    setFeedback([data, ...feedback])
   }
 
   // Set item to be updated
@@ -64,45 +75,15 @@ export const FeedbackProvider = ({ children }) => {
     })
   }
 
-  // Delete feedback
-  const deleteFeedback = async (id) => {
-    if (window.confirm("Are you sure you want to delete?")) {
-      await fetch(
-        `https://feedback-json-data-server.onrender.com/feedback/${id}`,
-        { method: "DELETE" }
-      )
-
-      setFeedback(feedback.filter((item) => item.id !== id))
-    }
-  }
-
-  // Add feedback
-  const addFeedback = async (newFeedback) => {
-    const response = await fetch(
-      "https://feedback-json-data-server.onrender.com/feedback",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newFeedback),
-      }
-    )
-
-    const data = await response.json()
-
-    setFeedback([data, ...feedback])
-  }
-
   return (
     <FeedbackContext.Provider
       value={{
         feedback,
+        feedbackEdit,
         isLoading,
         deleteFeedback,
         addFeedback,
         editFeedback,
-        feedbackEdit,
         updateFeedback,
       }}>
       {children}
